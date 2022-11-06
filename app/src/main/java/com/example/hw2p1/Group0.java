@@ -32,7 +32,7 @@ public class Group0 extends AppCompatActivity {
     private int unit_flag;
     private double tmp_speed_ms;
     private TextView txt_speed;
-    private TextView txt_location,txt_help;
+    private TextView txt_location;
     private Button btn_start,btn_unit,bbtn_help;
     private LocationManager myLocationManager;
     private String[] unit_options = {"M/s", "Mile/h", "Km/h"};
@@ -46,7 +46,7 @@ public class Group0 extends AppCompatActivity {
 
         txt_speed = findViewById(R.id.txt_speed);
         txt_location = findViewById(R.id.txt_location);
-        txt_help=findViewById(R.id.txt_help);
+        //txt_help=findViewById(R.id.txt_help);
         btn_start = findViewById(R.id.btn_start);
         btn_unit=findViewById(R.id.btn_unit);
         bbtn_help=findViewById(R.id.btn_help);
@@ -61,13 +61,13 @@ public class Group0 extends AppCompatActivity {
         bbtn_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!help_statue[0]){
-                    txt_help.setText(help_text);
-                    help_statue[0] =true;
-                }else{
-                    txt_help.setText("");
-                    help_statue[0] =false;
-                }
+//                if(!help_statue[0]){
+//                    txt_help.setText(help_text);
+//                    help_statue[0] =true;
+//                }else{
+//                    txt_help.setText("");
+//                    help_statue[0] =false;
+//                }
             }
         });
 
