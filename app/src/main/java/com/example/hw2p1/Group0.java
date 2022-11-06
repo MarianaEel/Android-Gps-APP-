@@ -11,7 +11,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -61,13 +63,18 @@ public class Group0 extends AppCompatActivity {
         bbtn_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                if(!help_statue[0]){
-//                    txt_help.setText(help_text);
-//                    help_statue[0] =true;
-//                }else{
-//                    txt_help.setText("");
-//                    help_statue[0] =false;
-//                }
+                final AlertDialog.Builder help_dialog =
+                        new AlertDialog.Builder(Group0.this);
+                help_dialog.setTitle("Help tips");
+                help_dialog.setMessage(help_text);
+                help_dialog.setPositiveButton("Close",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                help_dialog.show();
             }
         });
 
@@ -239,6 +246,7 @@ public class Group0 extends AppCompatActivity {
         if(location!=null){
             Message message1=handler.obtainMessage(1,1,1,String.format("%.4f", location.getLongitude()) +", "+ String.format("%.4f", location.getLatitude()));
             Message message2=handler.obtainMessage(2,1,1,String.valueOf(location.getSpeed()));
+            Message message3=handler.obtainMessage(3,1,1,String.valueOf(location.getAltitude()));
             handler.sendMessage(message1);
             handler.sendMessage(message2);
         }
