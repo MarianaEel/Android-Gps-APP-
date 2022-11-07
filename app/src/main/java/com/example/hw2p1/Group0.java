@@ -3,19 +3,15 @@ package com.example.hw2p1;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.contract.ActivityResultContracts;
+import static java.lang.Double.NaN;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -23,7 +19,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -37,14 +32,14 @@ import java.util.TimerTask;
 public class Group0 extends AppCompatActivity {
 
     private static final double EARTH_RADIUS = 6371000;
-    private double prev_longitude,prev_latitude,distance;
+    private double prev_longitude,prev_latitude,distance,highest_height,highest_speed,longest_distance,longest_time;
     private boolean run_status;
     private boolean refresh_utils_statue;
     private int unit_flag,distance_unit_flag,time_unit_flag;
     private double tmp_speed_ms,start_time,height;
     private double time;
     private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance;
-    private Button btn_start,btn_unit,bbtn_help;
+    private Button btn_start,btn_unit,bbtn_help,bbtn_high;
     private TextView label_time;
     private LocationManager myLocationManager;
     private final String[] unit_options = {"M/s", "Mile/h", "Km/h","Mile/min"};
@@ -67,6 +62,7 @@ public class Group0 extends AppCompatActivity {
         btn_start = findViewById(R.id.btn_start);
         btn_unit=findViewById(R.id.btn_unit);
         bbtn_help=findViewById(R.id.btn_help);
+        bbtn_high=findViewById(R.id.bbtn_high);
         label_distance=findViewById(R.id.label_distance);
         label_time=findViewById(R.id.label_time);
         run_status = false;
@@ -81,6 +77,10 @@ public class Group0 extends AppCompatActivity {
         prev_longitude=0;
         prev_latitude=0;
         refresh_utils_statue=false;
+        highest_speed=0;
+        longest_distance=0;
+        longest_time=0;
+        highest_height=NaN;
 
 
         myLocationManager= (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -122,7 +122,7 @@ public class Group0 extends AppCompatActivity {
                             break;
                         case 3:
                             BigDecimal e   =   new   BigDecimal(time_tmp_s*time_factors[3]);
-                            time_tmp   =   e.setScale(3,   RoundingMode.HALF_UP).doubleValue();
+                            time_tmp   =   e.setScale(5,   RoundingMode.HALF_UP).doubleValue();
                             break;
                     }
                     System.out.println(time);
@@ -137,14 +137,34 @@ public class Group0 extends AppCompatActivity {
 
         utils_timer.schedule(utils_refresh,0,1000);
 
-
         bbtn_help.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final AlertDialog.Builder help_dialog =
                         new AlertDialog.Builder(Group0.this);
-                help_dialog.setTitle("Help tips");
+                help_dialog.setTitle("High Scores");
                 help_dialog.setMessage(help_text);
+                help_dialog.setPositiveButton("Close",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                help_dialog.show();
+            }
+        });
+
+        bbtn_high.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final AlertDialog.Builder help_dialog =
+                        new AlertDialog.Builder(Group0.this);
+                help_dialog.setTitle("Help tips");
+                String high_metrics="Highest Speed: "+String.format("%2f",highest_speed);
+                high_metrics+="\nHighest Height: "+String.format("%.3f",highest_height);
+                high_metrics+="\nLongest Distance: "+String.valueOf(longest_distance);
+                help_dialog.setMessage(high_metrics);
                 help_dialog.setPositiveButton("Close",
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -402,6 +422,15 @@ public class Group0 extends AppCompatActivity {
             handler.sendMessage(message1);
             handler.sendMessage(message2);
             handler.sendMessage(message3);
+            if(location.getSpeed()>highest_speed){
+                highest_speed=location.getSpeed();
+            }
+            if(Double.isNaN(highest_height)){
+                highest_height=location.getAltitude();
+            }
+            if(location.getAltitude()>highest_height){
+                highest_height=location.getAltitude();
+            }
             if(prev_longitude==0||prev_latitude==0){
                 prev_longitude=longitude_tmp;
                 prev_latitude=latitude_tmp;
@@ -411,6 +440,9 @@ public class Group0 extends AppCompatActivity {
                 prev_longitude=longitude_tmp;
                 prev_latitude=latitude_tmp;
                 distance+=distance_tmp;
+                if(distance>longest_distance){
+                    longest_distance=distance;
+                }
             }
             //System.out.println("Speed:"+message2.obj);
         }
