@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,18 +29,30 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Group0 extends AppCompatActivity {
 
+    private static final double EARTH_RADIUS = 6371000;
+    private double prev_longitude,prev_latitude,distance;
     private boolean run_status;
-    private int unit_flag;
-    private double tmp_speed_ms;
-    private TextView txt_speed;
-    private TextView txt_location;
+    private boolean refresh_utils_statue;
+    private int unit_flag,distance_unit_flag,time_unit_flag;
+    private double tmp_speed_ms,start_time,height;
+    private double time;
+    private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance;
     private Button btn_start,btn_unit,bbtn_help;
+    private TextView label_time;
     private LocationManager myLocationManager;
-    private String[] unit_options = {"M/s", "Mile/h", "Km/h"};
+    private final String[] unit_options = {"M/s", "Mile/h", "Km/h","Mile/min"};
+    private final double[] unit_factors= {1,2.237,3.6,0.0373};
+    private final double[] distance_factors={1,0.001,0.000621371,3.28084};
+    private final double[] time_factors={1,0.0166667,0.000277778,1.157409722e-5};
     private int fontsize;
-    private String help_text="Click start to trace position and speed, if you want to change unit or font-size, just click the item you want to change.";
+    private final String help_text="Click start to trace position and speed, if you want to change unit or font-size, just click the item you want to change.";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,17 +61,82 @@ public class Group0 extends AppCompatActivity {
 
         txt_speed = findViewById(R.id.txt_speed);
         txt_location = findViewById(R.id.txt_location);
-        //txt_help=findViewById(R.id.txt_help);
+        txt_height=findViewById(R.id.txt_height);
+        txt_distance=findViewById(R.id.txt_distance);
+        txt_time=findViewById(R.id.txt_time);
         btn_start = findViewById(R.id.btn_start);
         btn_unit=findViewById(R.id.btn_unit);
         bbtn_help=findViewById(R.id.btn_help);
+        label_distance=findViewById(R.id.label_distance);
+        label_time=findViewById(R.id.label_time);
         run_status = false;
-        final boolean[] help_statue = {false};
         unit_flag=0;
+        distance_unit_flag=0;
+        time_unit_flag=0;
         tmp_speed_ms=0;
         fontsize=62;
+        distance=0;
+        start_time=0;
+        time=0;
+        prev_longitude=0;
+        prev_latitude=0;
+        refresh_utils_statue=false;
+
 
         myLocationManager= (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Timer utils_timer=new Timer();
+        TimerTask utils_refresh=new TimerTask() {
+            @Override
+            public void run() {
+                if(refresh_utils_statue&&start_time!=0){
+                    time= (System.currentTimeMillis()-start_time);
+
+                    switch (distance_unit_flag){
+                        case 0:
+                            txt_distance.setText(String.valueOf(distance*distance_factors[0]));
+                            break;
+                        case 1:
+                            txt_distance.setText(String.valueOf(distance*distance_factors[1]));
+                            break;
+                        case 2:
+                            txt_distance.setText(String.valueOf(distance*distance_factors[2]));
+                            break;
+                        case 3:
+                            txt_distance.setText(String.valueOf(distance*distance_factors[3]));
+                            break;
+                    }
+                    double time_tmp_s= Math.round(time/1000);
+                    double time_tmp=0;
+                    switch(time_unit_flag){
+                        case 0:
+                            BigDecimal b   =   new   BigDecimal(time_tmp_s*time_factors[0]);
+                            time_tmp   =   b.setScale(3,   RoundingMode.HALF_UP).doubleValue();
+                            break;
+                        case 1:
+                            BigDecimal c   =   new   BigDecimal(time_tmp_s*time_factors[1]);
+                            time_tmp   =   c.setScale(3,   RoundingMode.HALF_UP).doubleValue();
+                            break;
+                        case 2:
+                            BigDecimal d   =   new   BigDecimal(time_tmp_s*time_factors[2]);
+                            time_tmp   =   d.setScale(3,   RoundingMode.HALF_UP).doubleValue();
+                            break;
+                        case 3:
+                            BigDecimal e   =   new   BigDecimal(time_tmp_s*time_factors[3]);
+                            time_tmp   =   e.setScale(3,   RoundingMode.HALF_UP).doubleValue();
+                            break;
+                    }
+                    System.out.println(time);
+                    txt_time.setText(String.valueOf(time_tmp));
+                }
+                else if(refresh_utils_statue==false){
+                    txt_distance.setText("0.000");
+                    txt_time.setText("0.00");
+                }
+            }
+        };
+
+        utils_timer.schedule(utils_refresh,0,1000);
+
 
         bbtn_help.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,23 +168,78 @@ public class Group0 extends AppCompatActivity {
             }
         });
 
-        txt_speed.setTextColor(0xff808B96);
+        label_distance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (distance_unit_flag){
+                    case 0:
+                        txt_distance.setText(String.valueOf(distance*distance_factors[1]));
+                        label_distance.setText("Distance(KM)");
+                        distance_unit_flag++;
+                        break;
+                    case 1:
+                        txt_distance.setText(String.valueOf(distance*distance_factors[2]));
+                        label_distance.setText("Distance(Mile)");
+                        distance_unit_flag++;
+                        break;
+                    case 2:
+                        txt_distance.setText(String.valueOf(distance*distance_factors[3]));
+                        label_distance.setText("Distance(Feet)");
+                        distance_unit_flag++;
+                        break;
+                    case 3:
+                        txt_distance.setText(String.valueOf(distance*distance_factors[0]));
+                        label_distance.setText("Distance(M)");
+                        distance_unit_flag=0;
+                        break;
+                }
+            }
+        });
+
+        label_time.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch(time_unit_flag){
+                    case 0:
+                        label_time.setText("Time(Min)");
+                        time_unit_flag++;
+                        break;
+                    case 1:
+                        label_time.setText("Time(Hour)");
+                        time_unit_flag++;
+                        break;
+                    case 2:
+                        label_time.setText("Time(Day)");
+                        time_unit_flag++;
+                        break;
+                    case 3:
+                        label_time.setText("Time(Sec)");
+                        time_unit_flag=0;
+                        break;
+                }
+            }
+        });
+
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 if(run_status){
+                    refresh_utils_statue=false;
                     myLocationManager.removeUpdates(myLocationListener);
                     System.out.println("Location tracking stopped");
                     Toast.makeText(Group0.this,
                             "Location tracking stopped", Toast.LENGTH_SHORT).show();
                     btn_start.setText("Start");
-                    txt_location.setText("0.000, 0.000");
-                    txt_speed.setTextColor(0xff808B96);
+                    //txt_location.setText("0.0000, 0.0000");
+                    txt_speed.setTextColor(0xffffffff);
                     txt_speed.setText("0.00");
                     tmp_speed_ms=0;
                     run_status=false;
                 }else {
+                    if(start_time==0){
+                        start_time=System.currentTimeMillis();
+                    }
+                    refresh_utils_statue=true;
                     updateInfo();
                     System.out.println("Location tracking started");
                     Toast.makeText(Group0.this,
@@ -126,24 +259,31 @@ public class Group0 extends AppCompatActivity {
                 if (unit_flag == 0) {
                     btn_unit.setText(unit_options[1]);
                     unit_flag=1;
-                    double speed_mph=tmp_speed_ms*3600/1000;
-                    txt_speed.setText(String.valueOf(speed_mph));
+                    double speed_tmp=tmp_speed_ms*unit_factors[1];
+                    txt_speed.setText(String.valueOf(speed_tmp));
                     System.out.println("Unit changed");
                 }else if(unit_flag==1){
                     btn_unit.setText(unit_options[2]);
                     unit_flag=2;
-                    txt_speed.setText(String.valueOf(tmp_speed_ms));
-                    System.out.println("Unit changed");
-                }else {
-                    btn_unit.setText(unit_options[0]);
-                    unit_flag=0;
-                    double speed_mph=tmp_speed_ms*3600/1000/1.61;
-                    txt_speed.setText(String.valueOf(speed_mph));
+                    double speed_tmp=tmp_speed_ms*unit_factors[2];
+                    txt_speed.setText(String.valueOf(speed_tmp));
                     System.out.println("Unit changed");
                 }
-                btn_unit.setText(unit_options[(unit_flag+1)%3]);
-
-                unit_flag=(unit_flag+1)%3;
+                else if(unit_flag==2){
+                    btn_unit.setText(unit_options[3]);
+                    unit_flag=3;
+                    double speed_tmp=tmp_speed_ms*unit_factors[3];
+                    txt_speed.setText(String.valueOf(speed_tmp));
+                    System.out.println("Unit changed");
+                }
+                else {
+                    btn_unit.setText(unit_options[0]);
+                    unit_flag=0;
+                    double speed_tmp=tmp_speed_ms*unit_factors[0];
+                    txt_speed.setText(String.valueOf(speed_tmp));
+                    System.out.println("Unit changed");
+                }
+                btn_unit.setText(unit_options[unit_flag]);
             }
         });
 
@@ -162,10 +302,10 @@ public class Group0 extends AppCompatActivity {
             }
             else if(msg.what==2){
                 double speed_double=Double.parseDouble((String) msg.obj);
-                tmp_speed_ms=speed_double;
+                tmp_speed_ms=(double)Math.round(speed_double*100)/100;
                 // Select color
                 if(speed_double<10){
-                    txt_speed.setTextColor(0xff17202A);
+                    txt_speed.setTextColor(0xffffffff);
                 }else if(speed_double>=10&&speed_double<25){
                     txt_speed.setTextColor(0xff2ECC71);
                 }else if(speed_double>=25&&speed_double<50){
@@ -178,16 +318,27 @@ public class Group0 extends AppCompatActivity {
 
                 // Calculate speed in unit selected
                 if(unit_flag==1){
-                    double speed_mph=speed_double*3600/1000/1.61;
-                    txt_speed.setText(String.valueOf(speed_mph));
+                    double speed_tmp=tmp_speed_ms*unit_factors[1];
+                    txt_speed.setText(String.valueOf(speed_tmp));
                 }else if(unit_flag==2){
-                    double speed_kmh=speed_double*3600/1000;
-                    txt_speed.setText(String.valueOf(speed_kmh));
+                    double speed_tmp=tmp_speed_ms*unit_factors[2];
+                    txt_speed.setText(String.valueOf(speed_tmp));
                 }
-                else{
-                    txt_speed.setText((CharSequence) msg.obj);
+                else if(unit_flag==3) {
+                    double speed_tmp = tmp_speed_ms * unit_factors[3];
+                    txt_speed.setText(String.valueOf(speed_tmp));
+                }else{
+                    double speed_tmp=tmp_speed_ms*unit_factors[0];
+                    txt_speed.setText(String.valueOf(speed_tmp));
                 }
                 System.out.println("Speed refreshed");
+            }
+            else if(msg.what==3){
+                txt_height.setText((CharSequence)msg.obj);
+                System.out.println("Altitude refreshed");
+            }
+            else {
+                System.out.println("Unknown message");
             }
             return true;
         }
@@ -212,16 +363,15 @@ public class Group0 extends AppCompatActivity {
             if (checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                 Toast.makeText(Group0.this, "Please allow the location permission", Toast.LENGTH_SHORT).show();
-
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                ActivityResultLauncher<Intent> startActivityIntent = registerForActivityResult(
-                        new ActivityResultContracts.StartActivityForResult(),
-                        new ActivityResultCallback<ActivityResult>() {
-                            @Override
-                            public void onActivityResult(ActivityResult result) {
-                            }
-                        });
-                startActivityIntent.launch(intent);
+                //                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                ActivityResultLauncher<Intent> startActivityIntent = registerForActivityResult(
+//                        new ActivityResultContracts.StartActivityForResult(),
+//                        new ActivityResultCallback<ActivityResult>() {
+//                            @Override
+//                            public void onActivityResult(ActivityResult result) {
+//                            }
+//                        });
+//                startActivityIntent.launch(intent);
                 return;
             }
 
@@ -236,7 +386,7 @@ public class Group0 extends AppCompatActivity {
             Toast.makeText(Group0.this, "No location permission, function disabled", Toast.LENGTH_SHORT).show();
             return;
         }
-        myLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5,myLocationListener);
+        myLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0,myLocationListener);
         Location location = myLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         refreshInfo(location);
     }
@@ -244,16 +394,46 @@ public class Group0 extends AppCompatActivity {
     // This is used to send message to handler to refresh data on screen
     private void refreshInfo(Location location){
         if(location!=null){
-            Message message1=handler.obtainMessage(1,1,1,String.format("%.4f", location.getLongitude()) +", "+ String.format("%.4f", location.getLatitude()));
+            double longitude_tmp=location.getLongitude();
+            double latitude_tmp=location.getLatitude();
+            Message message1=handler.obtainMessage(1,1,1,String.format("%.4f", longitude_tmp) +", "+ String.format("%.4f", latitude_tmp));
             Message message2=handler.obtainMessage(2,1,1,String.valueOf(location.getSpeed()));
-            Message message3=handler.obtainMessage(3,1,1,String.valueOf(location.getAltitude()));
+            Message message3=handler.obtainMessage(3,1,1,String.format("%.3f",location.getAltitude()));
             handler.sendMessage(message1);
             handler.sendMessage(message2);
+            handler.sendMessage(message3);
+            if(prev_longitude==0||prev_latitude==0){
+                prev_longitude=longitude_tmp;
+                prev_latitude=latitude_tmp;
+            }else {
+                double distance_tmp=GetDistance(prev_longitude,prev_latitude,longitude_tmp,latitude_tmp);
+                System.out.println(distance_tmp);
+                prev_longitude=longitude_tmp;
+                prev_latitude=latitude_tmp;
+                distance+=distance_tmp;
+            }
+            //System.out.println("Speed:"+message2.obj);
         }
         else{
             System.out.println("Location is null");
         }
 
+    }
+
+    private static double rad(double d)
+    {
+        return d * Math.PI / 180.0;
+    }
+    // Code from https://cloud.tencent.com/developer/article/1622606
+    private static double GetDistance(double lon1,double lat1,double lon2, double lat2) {
+        double radLat1 = rad(lat1);
+        double radLat2 = rad(lat2);
+        double a = radLat1 - radLat2;
+        double b = rad(lon1) - rad(lon2);
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+        s = s * EARTH_RADIUS;
+        s = Math.round(s * 10000) / 10000;
+        return s;
     }
 
 }
