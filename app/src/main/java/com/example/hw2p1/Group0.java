@@ -19,11 +19,13 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.Console;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Timer;
@@ -39,7 +41,7 @@ public class Group0 extends AppCompatActivity {
     private double tmp_speed_ms,start_time,height;
     private double time;
     private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance;
-    private Button btn_start,btn_unit,bbtn_help,bbtn_high;
+    private Button btn_start,btn_unit,bbtn_help,bbtn_high,bbtn_reset;
     private TextView label_time;
     private LocationManager myLocationManager;
     private final String[] unit_options = {"M/s", "Mile/h", "Km/h","Mile/min"};
@@ -62,6 +64,7 @@ public class Group0 extends AppCompatActivity {
         btn_start = findViewById(R.id.btn_start);
         btn_unit=findViewById(R.id.btn_unit);
         bbtn_help=findViewById(R.id.btn_help);
+        bbtn_reset=findViewById(R.id.btn_reset);
         bbtn_high=findViewById(R.id.bbtn_high);
         label_distance=findViewById(R.id.label_distance);
         label_time=findViewById(R.id.label_time);
@@ -129,7 +132,7 @@ public class Group0 extends AppCompatActivity {
                     txt_time.setText(String.valueOf(time_tmp));
                 }
                 else if(refresh_utils_statue==false){
-                    txt_distance.setText("0.000");
+                    txt_distance.setText("0.0");
                     txt_time.setText("0.00");
                 }
             }
@@ -152,6 +155,28 @@ public class Group0 extends AppCompatActivity {
                             }
                         });
                 help_dialog.show();
+            }
+        });
+
+        bbtn_reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                highest_speed = 0;
+                txt_speed.setText("0.00");
+                txt_location.setText("00.000, 00.000");
+
+                highest_height = 0;
+                txt_height.setText("0.00");
+
+                distance = 0;
+                txt_distance.setText("0.0");
+
+                start_time =0;
+                txt_time.setText("0.00");
+
+                btn_start.setText("START");
+                run_status = false;
+
             }
         });
 
