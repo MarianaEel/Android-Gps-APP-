@@ -34,12 +34,12 @@ import java.util.TimerTask;
 public class Group0 extends AppCompatActivity {
 
     private static final double EARTH_RADIUS = 6371000;
-    private double prev_longitude,prev_latitude,distance,highest_height,highest_speed,longest_distance,longest_time;
+    private double prev_longitude,prev_latitude,distance,highest_height,lowest_height,highest_speed,lowest_speed,longest_distance,shortest_distance,longest_time,shortest_time;
     private boolean run_status;
     private boolean refresh_utils_statue;
     private int unit_flag,distance_unit_flag,time_unit_flag;
     private double tmp_speed_ms,start_time,height;
-    private double time;
+    private double time,time_tmp_s;
     private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance;
     private Button btn_start,btn_unit,bbtn_help,bbtn_high,bbtn_reset;
     private TextView label_time;
@@ -77,13 +77,18 @@ public class Group0 extends AppCompatActivity {
         distance=0;
         start_time=0;
         time=0;
+        time_tmp_s=0;
         prev_longitude=0;
         prev_latitude=0;
         refresh_utils_statue=false;
-        highest_speed=0;
+        highest_speed=NaN;
         longest_distance=0;
-        longest_time=0;
+        longest_time=NaN;
+        shortest_time=NaN;
+        lowest_speed=NaN;
+        shortest_distance=0;
         highest_height=NaN;
+        lowest_height=NaN;
 
 
         myLocationManager= (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -108,7 +113,7 @@ public class Group0 extends AppCompatActivity {
                             txt_distance.setText(String.valueOf(distance*distance_factors[3]));
                             break;
                     }
-                    double time_tmp_s= Math.round(time/1000);
+                    time_tmp_s= Math.round(time/1000);
                     double time_tmp=0;
                     switch(time_unit_flag){
                         case 0:
@@ -161,21 +166,27 @@ public class Group0 extends AppCompatActivity {
         bbtn_reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                highest_speed = 0;
+                highest_speed = NaN;
+                lowest_speed=NaN;
                 txt_speed.setText("0.00");
                 txt_location.setText("00.000, 00.000");
 
-                highest_height = 0;
+                highest_height = NaN;
+                lowest_speed=NaN;
                 txt_height.setText("0.00");
 
                 distance = 0;
+                longest_distance=0;
                 txt_distance.setText("0.0");
 
                 start_time =0;
+                longest_time=NaN;
+                shortest_time=NaN;
                 txt_time.setText("0.00");
 
                 btn_start.setText("START");
                 run_status = false;
+                myLocationManager.removeUpdates(myLocationListener);
 
             }
         });
@@ -186,9 +197,14 @@ public class Group0 extends AppCompatActivity {
                 final AlertDialog.Builder help_dialog =
                         new AlertDialog.Builder(Group0.this);
                 help_dialog.setTitle("Help tips");
-                String high_metrics="Highest Speed: "+String.format("%2f",highest_speed);
+                String high_metrics="Highest Speed: "+String.format("%.3f",highest_speed);
+                high_metrics+="\nLowest Speed: "+String.format("%.3f",lowest_speed);
                 high_metrics+="\nHighest Height: "+String.format("%.3f",highest_height);
+                high_metrics+="\nLowest Height: "+String.format("%.3f",lowest_height);
                 high_metrics+="\nLongest Distance: "+String.valueOf(longest_distance);
+                high_metrics+="\nLongest Time: "+String.format("%.3f",longest_time);
+                high_metrics+="\nShortest Time: "+String.format("%.3f",shortest_time);
+
                 help_dialog.setMessage(high_metrics);
                 help_dialog.setPositiveButton("Close",
                         new DialogInterface.OnClickListener() {
@@ -269,6 +285,15 @@ public class Group0 extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if(run_status){
+                    if(Double.isNaN(longest_time)){
+                        longest_time=time_tmp_s;
+                        shortest_time=time_tmp_s;
+                    }
+                    if(longest_time<time_tmp_s){
+                        longest_time=time_tmp_s;
+                    }else if(shortest_time>time_tmp_s){
+                        shortest_time=time_tmp_s;
+                    }
                     refresh_utils_statue=false;
                     myLocationManager.removeUpdates(myLocationListener);
                     System.out.println("Location tracking stopped");
@@ -281,9 +306,7 @@ public class Group0 extends AppCompatActivity {
                     tmp_speed_ms=0;
                     run_status=false;
                 }else {
-                    if(start_time==0){
-                        start_time=System.currentTimeMillis();
-                    }
+                    start_time=System.currentTimeMillis();
                     refresh_utils_statue=true;
                     updateInfo();
                     System.out.println("Location tracking started");
@@ -408,15 +431,6 @@ public class Group0 extends AppCompatActivity {
             if (checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                 Toast.makeText(Group0.this, "Please allow the location permission", Toast.LENGTH_SHORT).show();
-                //                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-//                ActivityResultLauncher<Intent> startActivityIntent = registerForActivityResult(
-//                        new ActivityResultContracts.StartActivityForResult(),
-//                        new ActivityResultCallback<ActivityResult>() {
-//                            @Override
-//                            public void onActivityResult(ActivityResult result) {
-//                            }
-//                        });
-//                startActivityIntent.launch(intent);
                 return;
             }
 
@@ -447,14 +461,23 @@ public class Group0 extends AppCompatActivity {
             handler.sendMessage(message1);
             handler.sendMessage(message2);
             handler.sendMessage(message3);
+            if(Double.isNaN(highest_speed)){
+                highest_speed=location.getSpeed();
+                lowest_speed=location.getSpeed();
+            }
             if(location.getSpeed()>highest_speed){
                 highest_speed=location.getSpeed();
+            }else if(location.getSpeed()<lowest_speed){
+                lowest_speed=location.getSpeed();
             }
             if(Double.isNaN(highest_height)){
                 highest_height=location.getAltitude();
+                lowest_height=location.getAltitude();
             }
             if(location.getAltitude()>highest_height){
                 highest_height=location.getAltitude();
+            }else if(location.getAltitude()<lowest_height){
+                lowest_height=location.getAltitude();
             }
             if(prev_longitude==0||prev_latitude==0){
                 prev_longitude=longitude_tmp;
