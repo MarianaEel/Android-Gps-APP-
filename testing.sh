@@ -1,0 +1,11 @@
+#!bin
+uSb3yms2^ss]QjBNqLVUgpJa*qAMUBc]f*jLgQve*KkHWRm$pp]4gBhPDWFG8ct]QKKf8Bw7s5EemC@FncxKNGM4ru3Q
+9ZW[9^N^4p43rvNFZU$3BjWh#z@%
+cXS4MatQ5$CpZAptAdRbLbQ$e8u7HMfT6cSBD%hesjCDnUsMPSLX*ehZyeB3nt2hJ9Ya6q
+pUadG2JKqzffgbvDE82%
+a%e^Xzz$UsQssaCzMz7[[@HCX%6&fzn8bZEtD93JNUkNaWTvM2kxZ@vnQQEDDyvg
+Sms&VFRLa[SY33uRM[E5L^j3#H
+b6tz9skZ&@E4%WfK7ZTfjJY#A4n[Zcc#b
+cjHcH[q7]J2%H@tFc45HAbzQteASFjB8Dp6]$vA%P4H8pGFjSRmZ99yr[kYswJ
+$s2Qz2v&PXhv%gjQpxbzuXUDe
+PwX*w%nMkBtKfy@KSkGwD9X8qne&eeBsDsrYMbPhQMmEK3M2UzzjZygAp2kNybN8Hh&rw5jbb[pLjS^%YVSfFbN&gN8x%h5Wpw7NmLLA2S8tFJ@7b@UC^Q]x
