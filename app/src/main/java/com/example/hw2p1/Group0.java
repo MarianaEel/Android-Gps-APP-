@@ -42,13 +42,13 @@ import java.util.TimerTask;
 public class Group0 extends AppCompatActivity {
 
     private static final double EARTH_RADIUS = 6371000;
-    private double prev_longitude,prev_latitude,distance,highest_height,lowest_height,highest_speed,lowest_speed,longest_distance,shortest_distance,longest_time,shortest_time,moving_time;
+    private double prev_longitude,prev_latitude,distance,highest_height,lowest_height,highest_speed,lowest_speed,longest_distance,shortest_distance,longest_time,shortest_time,moving_time,prev_speed;
     private boolean run_status;
     private boolean refresh_utils_statue;
     private int unit_flag,distance_unit_flag,time_unit_flag;
     private double tmp_speed_ms,start_time,height;
     private double time,time_tmp_s;
-    private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance,txt_moving;
+    private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance,txt_moving,txt_indicator;
     private Button btn_start,btn_unit,bbtn_help,bbtn_high,bbtn_reset;
     private TextView label_time;
     private LocationManager myLocationManager;
@@ -77,6 +77,7 @@ public class Group0 extends AppCompatActivity {
         label_distance=findViewById(R.id.label_distance);
         label_time=findViewById(R.id.label_time);
         txt_moving=findViewById(R.id.txt_moving_time);
+        txt_indicator=findViewById(R.id.indicator1);
         run_status = false;
         unit_flag=0;
         distance_unit_flag=0;
@@ -99,6 +100,7 @@ public class Group0 extends AppCompatActivity {
         highest_height=NaN;
         lowest_height=NaN;
         moving_time=0;
+        prev_speed=0;
 
         FileInputStream inputStream;
         try {
@@ -340,6 +342,7 @@ public class Group0 extends AppCompatActivity {
                     txt_speed.setTextColor(0xffffffff);
                     txt_speed.setText("0.00");
                     tmp_speed_ms=0;
+                    txt_indicator.setText("-");
                     run_status=false;
                 }else {
                     start_time=System.currentTimeMillis();
@@ -558,6 +561,13 @@ public class Group0 extends AppCompatActivity {
             handler.sendMessage(message1);
             handler.sendMessage(message2);
             handler.sendMessage(message3);
+            if(location.getSpeed()>prev_speed){
+                txt_indicator.setText("UP");
+            }else if(location.getSpeed()<prev_speed){
+                txt_indicator.setText("DOWN");
+            }else {
+                txt_indicator.setText("-");
+            }
             if(location.getSpeed()>0){
                 moving_time++;
             }
