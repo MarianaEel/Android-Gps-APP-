@@ -39,7 +39,7 @@ Enter high score page by pressing "High" button. In this page you can see the ma
 *High Score pannel*
 
 ## Reset
-Hit "Reset" button to reset all measurement, including High Score page.
+Hit "Reset" button to reset all measurement, including High Score page. Reset will not clear Moving time for it is set to record all time movement.
 
 ![ResetButtonImg](/resource/img/ResetButton.PNG)
 
@@ -60,7 +60,11 @@ Hit "Reset" button to reset all measurement, including High Score page.
 ## Historical Data
 Historical data will be stored in OnDestory() method. Encryption will be considered in further development for privacy and security purpose.
 
+![HistoricalDataImg](/resource/img/HistoricalData.PNG)
+
 ## Moving time
 Moving time increase every second if your speed is non-zero.
 
+![MovingTimeImg](/resource/img/MovingTime.PNG)
 
+*Moving Time*
