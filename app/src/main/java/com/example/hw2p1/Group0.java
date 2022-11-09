@@ -25,7 +25,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Console;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Timer;
@@ -34,13 +42,13 @@ import java.util.TimerTask;
 public class Group0 extends AppCompatActivity {
 
     private static final double EARTH_RADIUS = 6371000;
-    private double prev_longitude,prev_latitude,distance,highest_height,lowest_height,highest_speed,lowest_speed,longest_distance,shortest_distance,longest_time,shortest_time;
+    private double prev_longitude,prev_latitude,distance,highest_height,lowest_height,highest_speed,lowest_speed,longest_distance,shortest_distance,longest_time,shortest_time,moving_time;
     private boolean run_status;
     private boolean refresh_utils_statue;
     private int unit_flag,distance_unit_flag,time_unit_flag;
     private double tmp_speed_ms,start_time,height;
     private double time,time_tmp_s;
-    private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance;
+    private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance,txt_moving;
     private Button btn_start,btn_unit,bbtn_help,bbtn_high,bbtn_reset;
     private TextView label_time;
     private LocationManager myLocationManager;
@@ -68,6 +76,7 @@ public class Group0 extends AppCompatActivity {
         bbtn_high=findViewById(R.id.bbtn_high);
         label_distance=findViewById(R.id.label_distance);
         label_time=findViewById(R.id.label_time);
+        txt_moving=findViewById(R.id.txt_moving_time);
         run_status = false;
         unit_flag=0;
         distance_unit_flag=0;
@@ -89,6 +98,29 @@ public class Group0 extends AppCompatActivity {
         shortest_distance=0;
         highest_height=NaN;
         lowest_height=NaN;
+        moving_time=0;
+
+        FileInputStream inputStream;
+        try {
+            inputStream = new FileInputStream("/data/data/com.example.hw2p1/files/history_data.txt");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String str;
+            highest_speed= Double.parseDouble(bufferedReader.readLine());
+            lowest_speed= Double.parseDouble(bufferedReader.readLine());
+            highest_height= Double.parseDouble(bufferedReader.readLine());
+            lowest_height= Double.parseDouble(bufferedReader.readLine());
+            longest_distance= Double.parseDouble(bufferedReader.readLine());
+            longest_time= Double.parseDouble(bufferedReader.readLine());
+            shortest_time= Double.parseDouble(bufferedReader.readLine());
+            moving_time=Double.parseDouble(bufferedReader.readLine());
+            System.out.println("History data read from external file");
+            inputStream.close();
+            bufferedReader.close();
+        } catch (IOException e) {
+            System.out.println("First start, no history data");
+            e.printStackTrace();
+        }
 
 
         myLocationManager= (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -135,10 +167,12 @@ public class Group0 extends AppCompatActivity {
                     }
                     System.out.println(time);
                     txt_time.setText(String.valueOf(time_tmp));
+                    txt_moving.setText("Moving(Sec):     "+String.valueOf(moving_time));
                 }
                 else if(refresh_utils_statue==false){
                     txt_distance.setText("0.0");
                     txt_time.setText("0.00");
+                    txt_moving.setText("Moving(Sec):     0.0");
                 }
             }
         };
@@ -187,6 +221,8 @@ public class Group0 extends AppCompatActivity {
                 btn_start.setText("START");
                 run_status = false;
                 myLocationManager.removeUpdates(myLocationListener);
+
+                moving_time=0;
 
             }
         });
@@ -360,6 +396,67 @@ public class Group0 extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onPause() {
+        FileOutputStream fileOutputStream = null;
+        try {
+            String high_metrics=String.format("%.3f",highest_speed);
+            high_metrics+="\n"+String.format("%.3f",lowest_speed);
+            high_metrics+="\n"+String.format("%.3f",highest_height);
+            high_metrics+="\n"+String.format("%.3f",lowest_height);
+            high_metrics+="\n"+String.valueOf(longest_distance);
+            high_metrics+="\n"+String.format("%.3f",longest_time);
+            high_metrics+="\n"+String.format("%.3f",shortest_time);
+            high_metrics+="\n"+String.format("%.3f",moving_time);
+            fileOutputStream = openFileOutput("history_data.txt", MODE_PRIVATE);
+            fileOutputStream.write(high_metrics.getBytes());
+            System.out.println("History data saved to external file");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        super.onPause();
+        System.out.println("App paused");
+    }
+
+    @Override
+    protected void onDestroy(){
+        System.out.println("App destroyed");
+        FileOutputStream fileOutputStream = null;
+        try {
+            String high_metrics=String.format("%.3f",highest_speed);
+            high_metrics+="\n"+String.format("%.3f",lowest_speed);
+            high_metrics+="\n"+String.format("%.3f",highest_height);
+            high_metrics+="\n"+String.format("%.3f",lowest_height);
+            high_metrics+="\n"+String.valueOf(longest_distance);
+            high_metrics+="\n"+String.format("%.3f",longest_time);
+            high_metrics+="\n"+String.format("%.3f",shortest_time);
+            high_metrics+="\n"+String.format("%.3f",moving_time);
+            fileOutputStream = openFileOutput("history_data.txt", MODE_PRIVATE);
+            fileOutputStream.write(high_metrics.getBytes());
+            System.out.println("History data saved to external file");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        super.onDestroy();
+
+    }
+
     //Use to handle messages from location manager
     private Handler handler = new Handler(new Handler.Callback() {
         @Override
@@ -461,6 +558,9 @@ public class Group0 extends AppCompatActivity {
             handler.sendMessage(message1);
             handler.sendMessage(message2);
             handler.sendMessage(message3);
+            if(location.getSpeed()>0){
+                moving_time++;
+            }
             if(Double.isNaN(highest_speed)){
                 highest_speed=location.getSpeed();
                 lowest_speed=location.getSpeed();
