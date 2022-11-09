@@ -1,7 +1,7 @@
 # Android-Gps-APP-
 An Android GPS reading application.
 
-This application can read data from GPS sensor, tell you about your latitude and longtitude, and 
+This application can read data from GPS sensor, tell you about your latitude and longtitude, height, travel distance and using time informatiom. It support matrices change, high score recording, and historical data strorage. It is a nice tool to get you moving and record your day time travel.
 
 # Table of contents
 - [Android-Gps-APP-](#android-gps-app-)
