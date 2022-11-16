@@ -5,6 +5,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 import static java.lang.Double.NaN;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -25,6 +26,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.maps.MapView;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Console;
@@ -38,17 +42,29 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Timer;
 import java.util.TimerTask;
+import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class Group0 extends AppCompatActivity {
+public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener,
+        OnMapReadyCallback {
 
     private static final double EARTH_RADIUS = 6371000;
+    private GoogleMap mMap;
     private double prev_longitude,prev_latitude,distance,highest_height,lowest_height,highest_speed,lowest_speed,longest_distance,shortest_distance,longest_time,shortest_time,moving_time,prev_speed;
     private boolean run_status;
     private boolean refresh_utils_statue;
     private int unit_flag,distance_unit_flag,time_unit_flag;
     private double tmp_speed_ms,start_time,height;
     private double time,time_tmp_s;
-    private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance,txt_moving,txt_indicator;
+    private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance,txt_indicator;
     private Button btn_start,btn_unit,bbtn_help,bbtn_high,bbtn_reset;
     private TextView label_time;
     private LocationManager myLocationManager;
@@ -61,9 +77,14 @@ public class Group0 extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
         txt_speed = findViewById(R.id.txt_speed);
         txt_location = findViewById(R.id.txt_location);
         txt_height=findViewById(R.id.txt_height);
@@ -76,7 +97,7 @@ public class Group0 extends AppCompatActivity {
         bbtn_high=findViewById(R.id.bbtn_high);
         label_distance=findViewById(R.id.label_distance);
         label_time=findViewById(R.id.label_time);
-        txt_moving=findViewById(R.id.txt_moving_time);
+        //txt_moving=findViewById(R.id.txt_moving_time);
         txt_indicator=findViewById(R.id.indicator1);
         run_status = false;
         unit_flag=0;
@@ -169,12 +190,12 @@ public class Group0 extends AppCompatActivity {
                     }
                     System.out.println(time);
                     txt_time.setText(String.valueOf(time_tmp));
-                    txt_moving.setText("Moving(Sec):     "+String.valueOf(moving_time));
+                    //txt_moving.setText("Moving(Sec):     "+String.valueOf(moving_time));
                 }
                 else if(refresh_utils_statue==false){
                     txt_distance.setText("0.0");
                     txt_time.setText("0.00");
-                    txt_moving.setText("Moving(Sec):     0.0");
+                    //txt_moving.setText("Moving(Sec):     0.0");
                 }
             }
         };
@@ -205,7 +226,7 @@ public class Group0 extends AppCompatActivity {
                 highest_speed = NaN;
                 lowest_speed=NaN;
                 txt_speed.setText("0.00");
-                txt_location.setText("00.000, 00.000");
+                txt_location.setText("00.0000, 00.0000");
 
                 highest_height = NaN;
                 lowest_speed=NaN;
@@ -341,6 +362,7 @@ public class Group0 extends AppCompatActivity {
                     //txt_location.setText("0.0000, 0.0000");
                     txt_speed.setTextColor(0xffffffff);
                     txt_speed.setText("0.00");
+                    txt_location.setText("00.0000,00.0000");
                     tmp_speed_ms=0;
                     txt_indicator.setText("-");
                     run_status=false;
@@ -561,6 +583,14 @@ public class Group0 extends AppCompatActivity {
             handler.sendMessage(message1);
             handler.sendMessage(message2);
             handler.sendMessage(message3);
+            LatLng current_position = new LatLng(latitude_tmp, longitude_tmp);
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(current_position )      // Sets the center of the map to Mountain View
+                    .zoom(16)                   // Sets the zoom
+                    .bearing(90)                // Sets the orientation of the camera to east
+                    .tilt(15)                   // Sets the tilt of the camera to 30 degrees
+                    .build();                   // Creates a CameraPosition from the builder
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             if(location.getSpeed()>prev_speed){
                 txt_indicator.setText("UP");
             }else if(location.getSpeed()<prev_speed){
@@ -626,4 +656,21 @@ public class Group0 extends AppCompatActivity {
         return s;
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap=googleMap;
+        mMap.setMyLocationEnabled(true);
+        mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnMyLocationClickListener(this);
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        return false;
+    }
+
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+
+    }
 }
