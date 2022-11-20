@@ -13,17 +13,19 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +35,7 @@ import com.google.android.gms.maps.MapView;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Console;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -41,6 +44,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.os.Bundle;
@@ -66,7 +71,7 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
     private double tmp_speed_ms,start_time,height;
     private double time,time_tmp_s;
     private TextView txt_speed,txt_location,txt_height,txt_distance,txt_time,label_distance,txt_indicator;
-    private Button btn_start,btn_unit,bbtn_help,bbtn_high,bbtn_reset;
+    private Button btn_start,btn_unit,bbtn_help,bbtn_high,bbtn_reset, bbtn_export;
     private TextView label_time;
     private LocationManager myLocationManager;
     private final String[] unit_options = {"M/s", "Mile/h", "Km/h","Mile/min"};
@@ -79,8 +84,6 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -97,6 +100,7 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
         bbtn_help=findViewById(R.id.btn_help);
         bbtn_reset=findViewById(R.id.btn_reset);
         bbtn_high=findViewById(R.id.bbtn_high);
+        bbtn_export=findViewById(R.id.btn_export);
         label_distance=findViewById(R.id.label_distance);
         label_time=findViewById(R.id.label_time);
         //txt_moving=findViewById(R.id.txt_moving_time);
@@ -210,7 +214,7 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
             public void onClick(View view) {
                 final AlertDialog.Builder help_dialog =
                         new AlertDialog.Builder(Group0.this);
-                help_dialog.setTitle("High Scores");
+                help_dialog.setTitle("Help tips");
                 help_dialog.setMessage(help_text);
                 help_dialog.setPositiveButton("Close",
                         new DialogInterface.OnClickListener() {
@@ -222,6 +226,35 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
                 help_dialog.show();
             }
         });
+
+        bbtn_export.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String high_metrics="Highest Speed: "+String.format("%.3f",highest_speed);
+                high_metrics+="\nLowest Speed: "+String.format("%.3f",lowest_speed);
+                high_metrics+="\nAverage Speed: "+String.format("%.3f",aver_speed);
+                high_metrics+="\nHighest Height: "+String.format("%.3f",highest_height);
+                high_metrics+="\nLowest Height: "+String.format("%.3f",lowest_height);
+                high_metrics+="\nLongest Distance: "+String.valueOf(longest_distance);
+                high_metrics+="\nLongest Time: "+String.format("%.3f",longest_time);
+                high_metrics+="\nShortest Time: "+String.format("%.3f",shortest_time);
+                try {
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.setType("text/plain");
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"email@example.com"});
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Export Navigation History Data");
+                    emailIntent.putExtra(Intent.EXTRA_TITLE, "Navigation data previews");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT, high_metrics);
+
+                    startActivity(Intent.createChooser(emailIntent, "Email"));
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
 
         bbtn_reset.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -258,7 +291,7 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
             public void onClick(View view) {
                 final AlertDialog.Builder help_dialog =
                         new AlertDialog.Builder(Group0.this);
-                help_dialog.setTitle("Help tips");
+                help_dialog.setTitle("High Scores");
                 String high_metrics="Highest Speed: "+String.format("%.3f",highest_speed);
                 high_metrics+="\nLowest Speed: "+String.format("%.3f",lowest_speed);
                 high_metrics+="\nAverage Speed: "+String.format("%.3f",aver_speed);
