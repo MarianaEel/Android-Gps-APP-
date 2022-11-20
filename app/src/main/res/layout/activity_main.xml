@@ -14,7 +14,8 @@
         android:layout_height="match_parent"
         android:id="@+id/map"
         tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        tools:layout="@layout/activity_main" />
 
     <TextView
         android:id="@+id/txt_location"
@@ -52,7 +53,7 @@
     <TextView
         android:id="@+id/label_height"
         android:layout_width="150dp"
-        android:layout_height="30dp"
+        android:layout_height="48dp"
         android:clickable="true"
         android:gravity="center"
         android:text="Height(M):"
@@ -136,7 +137,7 @@
     <TextView
         android:id="@+id/label_time"
         android:layout_width="150dp"
-        android:layout_height="30dp"
+        android:layout_height="48dp"
         android:clickable="true"
         android:gravity="center"
         android:text="Time(Sec):"
@@ -187,6 +188,22 @@
         app:strokeColor="#000000"
         app:strokeWidth="5dp" />
 
+
+    <Button
+        android:id="@+id/btn_export"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#8A00BCD4"
+        android:text="Export"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.018"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.812" />
+
+
     <Button
         android:id="@+id/btn_help"
         android:layout_width="wrap_content"
@@ -199,7 +216,7 @@
         app:layout_constraintHorizontal_bias="0.018"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.667" />
+        app:layout_constraintVertical_bias="0.595" />
 
     <Button
         android:id="@+id/btn_reset"
@@ -213,7 +230,7 @@
         app:layout_constraintHorizontal_bias="0.018"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.812" />
+        app:layout_constraintVertical_bias="0.739" />
 
     <Button
         android:id="@+id/bbtn_high"
@@ -227,7 +244,7 @@
         app:layout_constraintHorizontal_bias="0.018"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.739" />
+        app:layout_constraintVertical_bias="0.667" />
 
     <Button
         android:id="@+id/btn_start"
