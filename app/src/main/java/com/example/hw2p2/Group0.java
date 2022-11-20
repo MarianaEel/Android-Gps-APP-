@@ -14,6 +14,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -74,6 +75,7 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
     private final double[] time_factors={1,0.0166667,0.000277778,1.157409722e-5};
     private int fontsize;
     private final String help_text="Click start to trace position and speed, if you want to change unit or font-size, just click the item you want to change.";
+    private double aver_speed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +124,7 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
         lowest_height=NaN;
         moving_time=0;
         prev_speed=0;
+        aver_speed=0;
 
         FileInputStream inputStream;
         try {
@@ -223,13 +226,13 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
         bbtn_reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                highest_speed = NaN;
-                lowest_speed=NaN;
+                highest_speed = 0;
+                lowest_speed=0;
                 txt_speed.setText("0.00");
                 txt_location.setText("00.0000, 00.0000");
 
-                highest_height = NaN;
-                lowest_speed=NaN;
+                highest_height = 0;
+                lowest_speed=0;
                 txt_height.setText("0.00");
 
                 distance = 0;
@@ -237,8 +240,8 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
                 txt_distance.setText("0.0");
 
                 start_time =0;
-                longest_time=NaN;
-                shortest_time=NaN;
+                longest_time=0;
+                shortest_time=0;
                 txt_time.setText("0.00");
 
                 btn_start.setText("START");
@@ -258,6 +261,7 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
                 help_dialog.setTitle("Help tips");
                 String high_metrics="Highest Speed: "+String.format("%.3f",highest_speed);
                 high_metrics+="\nLowest Speed: "+String.format("%.3f",lowest_speed);
+                high_metrics+="\nAverage Speed: "+String.format("%.3f",aver_speed);
                 high_metrics+="\nHighest Height: "+String.format("%.3f",highest_height);
                 high_metrics+="\nLowest Height: "+String.format("%.3f",lowest_height);
                 high_metrics+="\nLongest Distance: "+String.valueOf(longest_distance);
@@ -360,7 +364,8 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
                             "Location tracking stopped", Toast.LENGTH_SHORT).show();
                     btn_start.setText("Start");
                     //txt_location.setText("0.0000, 0.0000");
-                    txt_speed.setTextColor(0xffffffff);
+//                    txt_speed.setTextColor(0xffffffff);
+                    txt_speed.setTextColor(Color.parseColor("#000000"));
                     txt_speed.setText("0.00");
                     txt_location.setText("00.0000,00.0000");
                     tmp_speed_ms=0;
@@ -494,17 +499,28 @@ public class Group0 extends AppCompatActivity implements GoogleMap.OnMyLocationB
                 double speed_double=Double.parseDouble((String) msg.obj);
                 tmp_speed_ms=(double)Math.round(speed_double*100)/100;
                 // Select color
-                if(speed_double<10){
-                    txt_speed.setTextColor(0xffffffff);
-                }else if(speed_double>=10&&speed_double<25){
-                    txt_speed.setTextColor(0xff2ECC71);
-                }else if(speed_double>=25&&speed_double<50){
-                    txt_speed.setTextColor(0xff3498DB);
-                }else if(speed_double>=50&&speed_double<80){
-                    txt_speed.setTextColor(0xff9B59B6);
-                } else {
-                    txt_speed.setTextColor(0xffE74C3C);
+                if (longest_time != 0) {
+                    aver_speed = distance / time_tmp_s;
                 }
+
+                if (speed_double < aver_speed - 2) {
+                    txt_speed.setTextColor(Color.parseColor("#008000"));
+                } else if (speed_double > aver_speed + 2) {
+                    txt_speed.setTextColor(Color.parseColor("#FF0000"));
+                } else {
+                    txt_speed.setTextColor(Color.parseColor("#000000"));
+                }
+//                if(speed_double<10){
+//                    txt_speed.setTextColor(0xffffffff);
+//                }else if(speed_double>=10&&speed_double<25){
+//                    txt_speed.setTextColor(0xff2ECC71);
+//                }else if(speed_double>=25&&speed_double<50){
+//                    txt_speed.setTextColor(0xff3498DB);
+//                }else if(speed_double>=50&&speed_double<80){
+//                    txt_speed.setTextColor(0xff9B59B6);
+//                } else {
+//                    txt_speed.setTextColor(0xffE74C3C);
+//                }
 
                 // Calculate speed in unit selected
                 if(unit_flag==1){
