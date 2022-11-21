@@ -18,10 +18,10 @@ An Android GPS reading application that reads data from a GPS sensor tells you a
     - [Reset](#reset)
     - [Historical Data](#historical-data)
     - [Moving time](#moving-time)
-  - [Change speed color](#Change speed color)
-  - [Kalman Filter](#Kalman Filter)
-  - [View acceleration](#View acceleration)
-  - [Export feature](#Export feature )
+  - [Change speed color](#change-speed-color)
+  - [Kalman Filter](#kalman-filter)
+  - [View acceleration](#view-acceleration)
+  - [Export feature](#export-feature )
 
   
 
